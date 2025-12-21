@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>Hendam</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+/* --- صفحة التحميل --- */
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #ffffff; /* لون الخلفية خلف الصورة */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+}
+#loader img {
+  width: 250px; /* يمكنك التحكم في حجم الصورة من هنا */
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  animation: pulse 2s infinite ease-in-out;
+}
+#loader .loading-text {
+  margin-top: 20px;
+  font-weight: bold;
+  color: #111;
+  font-size: 1.2rem;
+}
+
+/* حركة بسيطة للصورة لجعل التحميل يبدو حيوياً */
+@keyframes pulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+/* إخفاء المحتوى الرئيسي أثناء التحميل */
+.loaded-content {
+  display: none;
+}
+
+body{font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f8f9fa; margin:0; padding-top: 70px;}
+
+/* هيدر ثابت ومنظم */
+header {
+  background: #111;
+  color: #fff;
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  box-sizing: border-box;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+header .empty-space { width: 30px; } 
+header .title { flex-grow: 1; text-align: center; font-weight: bold; font-size: 1.2rem; }
+header .fav-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; width: 30px; transition: 0.3s; }
+header .fav-btn:hover { transform: scale(1.2); color: #ff4757; }
+
+.container{padding: 15px; max-width: 600px; margin: auto;}
+.card{
+  background:#fff; padding:15px; border-radius:15px;
+  margin-bottom:15px; box-shadow:0 4px 12px rgba(0,0,0,0.05);
+}
+h3 { margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+input, select, button {
+  width:100%; padding:12px; margin-top:10px;
+  border-radius:10px; border:1px solid #ddd; font-size:14px; box-sizing: border-box;
+}
+button { background:#111; color:white; border:none; cursor:pointer; font-weight: bold; transition: 0.3s; }
+button:hover { background: #333; }
+
+.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px}
+.item{ background:#fff; border: 1px solid #eee; border-radius:12px; padding:8px; text-align:center; transition: 0.3s; }
+.item:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.item img{ width:100%; height:130px; object-fit:cover; border-radius:10px; }
+.actions button{ font-size:12px; margin-top:4px; padding:6px; background: #ee5253; }
+
+.hidden{display:none}
+hr { border: 0; border-top: 1px dashed #ccc; margin: 20px 0; }
+</style>
+</head>
+
+<body>
+
+<div id="loader">
+  <img src="https://www2.0zz0.com/2025/12/21/18/455656802.png" alt="Hendam Logo">
+  <div class="loading-text">جاري تحضير خزانتك...</div>
+</div>
+
+<div id="mainContent" class="loaded-content">
+    <header>
+      <div class="empty-space"></div> <div class="title">Hendam 🕶️</div>
+      <button class="fav-btn" onclick="toggleFavorites()">❤️</button>
+    </header>
+
+    <div class="container">
+        <div id="closetPage">
+          <div class="card">
+            <h3>➕ إضافة قطعة جديدة</h3>
+            <input type="file" id="image" accept="image/*">
+            <select id="type">
+              <option>قميص</option>
+              <option>بنطال</option>
+              <option>حذاء</option>
+              <option>جاكيت</option>
+            </select>
+            <input id="color" placeholder="مثلاً: أزرق، أسود...">
+            <button onclick="addItem()">إضافة للخزانة</button>
+          </div>
+
+          <div class="card">
+            <h3>☀️ حالة الطقس اليوم</h3>
+            <select id="weather" onchange="saveWeather()">
+              <option value="hot">🔥 حار (ملابس خفيفة)</option>
+              <option value="mild">🌤️ معتدل</option>
+              <option value="cold">❄️ بارد (تحتاج جاكيت)</option>
+            </select>
+          </div>
+
+          <div class="card">
+            <h3>🧠 اقتراح ذكي للأوتفيت</h3>
+            <button onclick="suggestOutfit()" style="background: #2f3542;">توليد اقتراح</button>
+            <div class="grid" id="outfit" style="margin-top:15px"></div>
+            <button id="saveFavBtn" class="hidden" onclick="saveFavorite()" style="background: #ff4757;">❤️ حفظ هذا التنسيق</button>
+          </div>
+
+          <div class="card">
+            <h3>🧺 ملابسي المتاحة</h3>
+            <div class="grid" id="closet"></div>
+          </div>
+        </div>
+
+        <div id="favPage" class="hidden">
+          <div class="card">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <h3>❤️ التنسيقات المفضلة</h3>
+                <button onclick="toggleFavorites()" style="width: auto; padding: 5px 15px;">رجوع</button>
+            </div>
+            <div id="favorites"></div>
+          </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- كود التحكم في شاشة التحميل ---
+window.addEventListener('load', function() {
+    // ننتظر ثانيتين (2000ms) لإظهار اللوجو ثم نخفيه
+    setTimeout(() => {
+        const loader = document.getElementById('loader');
+        const mainContent = document.getElementById('mainContent');
+        
+        loader.style.opacity = '0'; // تأثير تلاشي
+        setTimeout(() => {
+            loader.style.display = 'none';
+            mainContent.style.display = 'block';
+        }, 500);
+    }, 2500); 
+});
+
+// --- بقية الأكواد السابقة ---
+let closet = JSON.parse(localStorage.getItem("closet"))||[];
+let favorites = JSON.parse(localStorage.getItem("favorites"))||[];
+let weather = localStorage.getItem("weather")||"hot";
+let currentOutfit=[];
+
+document.getElementById("weather").value=weather;
+
+function saveAll(){
+    localStorage.setItem("closet",JSON.stringify(closet));
+    localStorage.setItem("favorites",JSON.stringify(favorites));
+    localStorage.setItem("weather",weather);
+}
+
+function saveWeather(){
+    weather=document.getElementById("weather").value;
+    saveAll();
+    Swal.fire({ title: 'تم التحديث', text: 'تم تغيير حالة الطقس', icon: 'success', timer: 1500, showConfirmButton: false });
+}
+
+function addItem(){
+    let imgInput=document.getElementById("image");
+    let type=document.getElementById("type").value;
+    let color=document.getElementById("color").value;
+    
+    if(!imgInput.files[0] || !color) {
+        return Swal.fire('تنبيه', 'يرجى اختيار صورة وكتابة اللون', 'warning');
+    }
+
+    let r=new FileReader();
+    r.onload=e=>{
+        closet.push({img:e.target.result, type, color});
+        saveAll();
+        renderCloset();
+        imgInput.value = "";
+        document.getElementById("color").value = "";
+        Swal.fire({ title: 'ممتاز!', text: 'تمت إضافة القطعة بنجاح', icon: 'success', timer: 1500, showConfirmButton: false });
+    };
+    r.readAsDataURL(imgInput.files[0]);
+}
+
+function renderCloset(){
+    let c=document.getElementById("closet");
+    c.innerHTML= closet.length === 0 ? "<p style='text-align:center; color:#999;'>خزانتك فارغة حالياً</p>" : "";
+    closet.forEach((i,idx)=>{
+        c.innerHTML+=`
+        <div class="item">
+            <img src="${i.img}">
+            <div style="font-weight:bold; margin-top:5px">${i.type}</div>
+            <input style="margin:2px; padding:4px; text-align:center; font-size:12px" value="${i.color}" onchange="editColor(${idx},this.value)">
+            <div class="actions">
+                <button onclick="removeItem(${idx})">🗑️ حذف</button>
+            </div>
+        </div>`;
+    });
+}
+renderCloset();
+
+function editColor(i,val){ closet[i].color=val; saveAll(); }
+
+function removeItem(i){
+    Swal.fire({
+        title: 'هل أنت متأكد؟',
+        text: "سيتم حذف هذه القطعة نهائياً",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'نعم، احذفها',
+        cancelButtonText: 'إلغاء'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            closet.splice(i,1);
+            saveAll();
+            renderCloset();
+        }
+    });
+}
+
+function suggestOutfit(){
+    let shirt=closet.find(i=>i.type=="قميص");
+    let pants=closet.find(i=>i.type=="بنطال");
+    let shoes=closet.find(i=>i.type=="حذاء");
+    let jacket=closet.find(i=>i.type=="جاكيت");
+
+    if(!shirt || !pants || !shoes) {
+        return Swal.fire('نقص في الملابس', 'تحتاج على الأقل إلى (قميص، بنطال، وحذاء) لاقتراح أوتفيت كامل.', 'info');
+    }
+
+    currentOutfit=[];
+    currentOutfit.push(shirt, pants, shoes);
+    
+    if(weather=="cold") {
+        if(jacket) currentOutfit.push(jacket);
+        else Swal.fire('الجو بارد!', 'نقترح عليك إضافة "جاكيت" لخزانتك لتكتمل الإطلالة الشتوية.', 'info');
+    }
+
+    let box=document.getElementById("outfit");
+    box.innerHTML="";
+    currentOutfit.forEach(i=>{
+        box.innerHTML+=`<div class="item"><img src="${i.img}"><div>${i.type}</div><small>${i.color}</small></div>`;
+    });
+    document.getElementById("saveFavBtn").classList.remove("hidden");
+}
+
+function saveFavorite(){
+    if(currentOutfit.length==0) return;
+    favorites.push([...currentOutfit]);
+    saveAll();
+    Swal.fire('تم الحفظ', 'تم إضافة الأوتفيت إلى مفضلتك ❤️', 'success');
+}
+
+function toggleFavorites(){
+    document.getElementById("closetPage").classList.toggle("hidden");
+    document.getElementById("favPage").classList.toggle("hidden");
+    if(!document.getElementById("favPage").classList.contains("hidden")) renderFavorites();
+}
+
+function renderFavorites(){
+    let f=document.getElementById("favorites");
+    f.innerHTML= favorites.length === 0 ? "<p style='text-align:center; color:#999;'>لا توجد تنسيقات محفوظة بعد</p>" : "";
+    favorites.forEach((outfit, idx)=>{
+        let row=`<div style="display:flex; justify-content:space-between; align-items:center"><strong>تنسيق #${idx+1}</strong> <button onclick="deleteFav(${idx})" style="width:auto; background:none; color:red; padding:0">🗑️</button></div><div class='grid' style='margin:10px 0'>`;
+        outfit.forEach(i=>{
+            row+=`<div class="item" style="height:auto"><img src="${i.img}" style="height:60px"><div><small>${i.type}</small></div></div>`;
+        });
+        row+="</div><hr>";
+        f.innerHTML+=row;
+    });
+}
+
+function deleteFav(i) {
+    favorites.splice(i,1);
+    saveAll();
+    renderFavorites();
+}
+</script>
+
+</body>
+</html>
