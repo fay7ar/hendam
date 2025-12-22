@@ -70,7 +70,16 @@ header {
   box-sizing: border-box;
   box-shadow: 0 2px 10px rgba(0,0,0,0.2);
 }
-header .empty-space { width: 30px; } 
+/* تنسيق عداد المستخدمين */
+header .user-counter { 
+  font-size: 0.8rem; 
+  color: #ff4757; 
+  background: rgba(255,255,255,0.1);
+  padding: 4px 8px;
+  border-radius: 10px;
+  min-width: 50px;
+  text-align: center;
+} 
 header .title { flex-grow: 1; text-align: center; font-weight: bold; font-size: 1.2rem; }
 header .fav-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; width: 30px; transition: 0.3s; }
 header .fav-btn:hover { transform: scale(1.2); color: #ff4757; }
@@ -108,7 +117,8 @@ hr { border: 0; border-top: 1px dashed #ccc; margin: 20px 0; }
 
 <div id="mainContent" class="loaded-content">
     <header>
-      <div class="empty-space"></div> <div class="title">Hendam 🕶️</div>
+      <div id="visitCount" class="user-counter">...</div> 
+      <div class="title">Hendam 🕶️</div>
       <button class="fav-btn" onclick="toggleFavorites()">❤️</button>
     </header>
 
@@ -162,7 +172,25 @@ hr { border: 0; border-top: 1px dashed #ccc; margin: 20px 0; }
 </div>
 
 <script>
+// دالة لجلب عدد الزيارات من API خارجي مجاني
+function getVisits() {
+    // تم استخدام مفتاح فريد لتطبيق Hendam
+    const namespace = "hendam_app_2025";
+    const key = "unique_visits";
+    
+    fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('visitCount').innerText = `👤 ${data.value}`;
+        })
+        .catch(() => {
+            document.getElementById('visitCount').innerText = "👤 1";
+        });
+}
+
 window.addEventListener('load', function() {
+    getVisits(); // استدعاء العداد عند التحميل
+    
     setTimeout(() => {
         const loader = document.getElementById('loader');
         const mainContent = document.getElementById('mainContent');
