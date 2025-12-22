@@ -1,341 +1,323 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<title>Hendam</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Hendam</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="icon" type="image/png" href="https://www2.0zz0.com/2025/12/21/18/455656802.png">
-<link rel="apple-touch-icon" href="https://www2.0zz0.com/2025/12/21/18/455656802.png">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Hendam">
+    <link rel="icon" type="image/png" href="https://www2.0zz0.com/2025/12/21/18/455656802.png">
+    <link rel="apple-touch-icon" href="https://www2.0zz0.com/2025/12/21/18/455656802.png">
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, set, get, update, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAq2G3dh6WarRBzNc8VJOSNeOu2FJpaLOM",
+            authDomain: "hendam-ly.firebaseapp.com",
+            databaseURL: "https://hendam-ly-default-rtdb.firebaseio.com",
+            projectId: "hendam-ly",
+            storageBucket: "hendam-ly.firebasestorage.app",
+            messagingSenderId: "277250592964",
+            appId: "1:277250592964:web:d4a035703de8f26e2fb991"
+        };
 
-<style>
-/* --- صفحة التحميل --- */
-#loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #ffffff; 
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  transition: opacity 0.5s ease;
-}
-#loader img {
-  width: 250px; 
-  height: auto;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  animation: pulse 2s infinite ease-in-out;
-}
-#loader .loading-text {
-  margin-top: 20px;
-  font-weight: bold;
-  color: #111;
-  font-size: 1.2rem;
-}
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        window.db = db;
 
-@keyframes pulse {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  50% { transform: scale(1); opacity: 1; }
-  100% { transform: scale(0.95); opacity: 0.8; }
-}
+        // --- نظام المستخدمين ---
+        window.registerUser = async () => {
+            const userId = Math.floor(1000 + Math.random() * 9000).toString();
+            const { value: password } = await Swal.fire({
+                title: 'مرحباً بك في هندام',
+                text: `رقمك التعريفي الجديد هو: ${userId}. يرجى تعيين كلمة مرور:`,
+                input: 'password',
+                inputPlaceholder: 'كلمة المرور',
+                allowOutsideClick: false,
+                confirmButtonText: 'حفظ والدخول',
+                footer: '<b style="color:red">⚠️ يرجى تصوير الشاشة وحفظ الرقم السري للوصول لخزانتك لاحقاً!</b>'
+            });
 
-.loaded-content {
-  display: none;
-}
+            if (password) {
+                await set(ref(db, 'users/' + userId), { password: password, closet: [], favorites: [] });
+                localStorage.setItem("hendam_user", userId);
+                localStorage.setItem("hendam_pass", password);
+                location.reload();
+            }
+        };
 
-body{font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f8f9fa; margin:0; padding-top: 70px;}
+        window.loginUser = async () => {
+            const { value: formValues } = await Swal.fire({
+                title: 'تسجيل الدخول',
+                html:
+                    '<input id="swal-input1" class="swal2-input" placeholder="الرقم التعريفي (4 أرقام)">' +
+                    '<input id="swal-input2" type="password" class="swal2-input" placeholder="كلمة المرور">',
+                focusConfirm: false,
+                preConfirm: () => [
+                    document.getElementById('swal-input1').value,
+                    document.getElementById('swal-input2').value
+                ]
+            });
 
-header {
-  background: #111;
-  color: #fff;
-  padding: 0 20px;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-  box-sizing: border-box;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-}
-/* تنسيق عداد المستخدمين */
-header .user-counter { 
-  font-size: 0.8rem; 
-  color: #ff4757; 
-  background: rgba(255,255,255,0.1);
-  padding: 4px 8px;
-  border-radius: 10px;
-  min-width: 50px;
-  text-align: center;
-} 
-header .title { flex-grow: 1; text-align: center; font-weight: bold; font-size: 1.2rem; }
-header .fav-btn { background: none; border: none; color: white; font-size: 22px; cursor: pointer; width: 30px; transition: 0.3s; }
-header .fav-btn:hover { transform: scale(1.2); color: #ff4757; }
+            if (formValues) {
+                const [id, pass] = formValues;
+                const snapshot = await get(ref(db, 'users/' + id));
+                if (snapshot.exists() && snapshot.val().password === pass) {
+                    localStorage.setItem("hendam_user", id);
+                    localStorage.setItem("hendam_pass", pass);
+                    location.reload();
+                } else {
+                    Swal.fire('خطأ', 'البيانات غير صحيحة', 'error');
+                }
+            }
+        };
 
-.container{padding: 15px; max-width: 600px; margin: auto;}
-.card{
-  background:#fff; padding:15px; border-radius:15px;
-  margin-bottom:15px; box-shadow:0 4px 12px rgba(0,0,0,0.05);
-}
-h3 { margin-top: 0; color: #333; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; }
-input, select, button {
-  width:100%; padding:12px; margin-top:10px;
-  border-radius:10px; border:1px solid #ddd; font-size:14px; box-sizing: border-box;
-}
-button { background:#111; color:white; border:none; cursor:pointer; font-weight: bold; transition: 0.3s; }
-button:hover { background: #333; }
+        // عداد الزيارات (للمسجلين والضيوف)
+        const visitRef = ref(db, 'stats/visitCount');
+        runTransaction(visitRef, (currentValue) => (currentValue || 0) + 1);
+        onValue(visitRef, (snapshot) => {
+            document.getElementById('visitCount').innerText = `👤 زوار الموقع: ${snapshot.val()}`;
+        });
+    </script>
 
-.grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px}
-.item{ background:#fff; border: 1px solid #eee; border-radius:12px; padding:8px; text-align:center; transition: 0.3s; }
-.item:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-.item img{ width:100%; height:130px; object-fit:cover; border-radius:10px; }
-.actions button{ font-size:12px; margin-top:4px; padding:6px; background: #ee5253; }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-.hidden{display:none}
-hr { border: 0; border-top: 1px dashed #ccc; margin: 20px 0; }
-</style>
+    <style>
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        #loader img { width: 180px; height: auto; animation: pulse 2s infinite ease-in-out; }
+        @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.8; } }
+        
+        body{font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f4f7f6; margin:0; padding-top: 80px;}
+        
+        header { background: #111; color: #fff; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: fixed; top: 0; width: 100%; z-index: 1000; box-sizing: border-box; }
+        .user-info-bar { background: #222; color: #eee; font-size: 0.75rem; padding: 5px 15px; display: flex; justify-content: center; gap: 15px; position: fixed; top: 55px; width: 100%; z-index: 999; border-bottom: 1px solid #333; }
+        .user-info-bar span { color: #ff4757; font-weight: bold; }
+
+        .container{padding: 15px; max-width: 600px; margin: auto;}
+        .card{ background:#fff; padding:15px; border-radius:15px; margin-bottom:15px; box-shadow:0 4px 12px rgba(0,0,0,0.05); }
+        .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px}
+        .item{ background:#fff; border: 1px solid #eee; border-radius:12px; padding:8px; text-align:center; position: relative; }
+        .item img{ width:100%; height:130px; object-fit:cover; border-radius:10px; }
+        
+        button { background:#111; color:white; border:none; cursor:pointer; font-weight: bold; border-radius:10px; padding: 12px; transition: 0.3s; }
+        button:active { transform: scale(0.98); }
+        .btn-guest { background: #57606f; margin-top: 10px; }
+        
+        .hidden{display:none !important;}
+        .user-counter { font-size: 0.7rem; color: #bbb; }
+    </style>
 </head>
 
 <body>
 
 <div id="loader">
-  <img src="https://www2.0zz0.com/2025/12/21/18/455656802.png" alt="Hendam Logo">
-  <div class="loading-text">جاري تحضير خزانتك...</div>
+    <img src="https://www2.0zz0.com/2025/12/21/18/455656802.png" alt="Hendam Logo">
+    <div style="margin-top:20px; color:#555">جاري تجهيز خزانتك...</div>
 </div>
 
-<div id="mainContent" class="loaded-content">
-    <header>
-      <div id="visitCount" class="user-counter">...</div> 
-      <div class="title">Hendam 🕶️</div>
-      <button class="fav-btn" onclick="toggleFavorites()">❤️</button>
-    </header>
+<header>
+    <div id="visitCount" class="user-counter">...</div> 
+    <div style="font-weight: bold; font-size: 1.2rem;">Hendam 🕶️</div>
+    <button onclick="toggleFavorites()" style="background:none; padding:0; font-size:22px">❤️</button>
+</header>
 
-    <div class="container">
-        <div id="closetPage">
-          <div class="card">
+<div id="userInfoBar" class="user-info-bar hidden">
+    <div>رقم الخزانة: <span id="displayId">0000</span></div>
+    <div>كلمة السر: <span id="displayPass">****</span></div>
+</div>
+
+<div class="container">
+    <div id="authSection" class="card" style="text-align: center; margin-top: 20px;">
+        <img src="https://www2.0zz0.com/2025/12/21/18/455656802.png" style="width:80px; margin-bottom:15px">
+        <h3>مرحباً بك في هندام</h3>
+        <p style="color:#666; font-size: 0.9rem;">يمكنك استخدام التطبيق كضيف أو إنشاء حساب لحفظ ملابسك للأبد.</p>
+        <button onclick="registerUser()">إنشاء خزانة (حساب جديد)</button>
+        <button onclick="loginUser()" style="background:#444; margin-top:10px">تسجيل الدخول</button>
+        <button onclick="continueAsGuest()" class="btn-guest">المتابعة كضيف 🔓</button>
+    </div>
+
+    <div id="mainPage" class="hidden">
+        <div class="card">
             <h3>➕ إضافة قطعة جديدة</h3>
-            <input type="file" id="image" accept="image/*">
-            <select id="type">
-              <option>قميص</option>
-              <option>بنطال</option>
-              <option>حذاء</option>
-              <option>جاكيت</option>
+            <input type="file" id="image" accept="image/*" style="width:100%; padding:10px; margin-bottom:10px">
+            <select id="type" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px">
+                <option>قميص</option>
+                <option>بنطال</option>
+                <option>حذاء</option>
+                <option>جاكيت</option>
             </select>
-            <input id="color" placeholder="مثلاً: أزرق، أسود...">
-            <button onclick="addItem()">إضافة للخزانة</button>
-          </div>
-
-          <div class="card">
-            <h3>☀️ حالة الطقس اليوم</h3>
-            <select id="weather" onchange="saveWeather()">
-              <option value="hot">🔥 حار (ملابس خفيفة)</option>
-              <option value="mild">🌤️ معتدل</option>
-              <option value="cold">❄️ بارد (تحتاج جاكيت)</option>
-            </select>
-          </div>
-
-          <div class="card">
-            <h3>🧠 اقتراح ذكي للأوتفيت</h3>
-            <button onclick="suggestOutfit()" style="background: #2f3542;">توليد اقتراح</button>
-            <div class="grid" id="outfit" style="margin-top:15px"></div>
-            <button id="saveFavBtn" class="hidden" onclick="saveFavorite()" style="background: #ff4757;">❤️ حفظ هذا التنسيق</button>
-          </div>
-
-          <div class="card">
-            <h3>🧺 ملابسي المتاحة</h3>
-            <div class="grid" id="closet"></div>
-          </div>
+            <input id="color" placeholder="اللون (مثال: أسود)" style="width:100%; padding:10px; margin-bottom:10px; border-radius:8px; border:1px solid #ddd">
+            <button onclick="addItem()" style="width:100%; background:#2ed573">إضافة للخزانة</button>
         </div>
 
-        <div id="favPage" class="hidden">
-          <div class="card">
-            <div style="display:flex; justify-content: space-between; align-items: center;">
-                <h3>❤️ التنسيقات المفضلة</h3>
-                <button onclick="toggleFavorites()" style="width: auto; padding: 5px 15px;">رجوع</button>
-            </div>
+        <div class="card">
+            <h3>🧠 اقتراح ذكي</h3>
+            <button onclick="suggestOutfit()" style="background: #2f3542; width:100%">توليد تنسيق ملابس</button>
+            <div class="grid" id="outfit" style="margin-top:15px"></div>
+            <button id="saveFavBtn" class="hidden" onclick="saveFavorite()" style="background: #ff4757; width:100%; margin-top:10px">❤️ حفظ في المفضلة</button>
+        </div>
+
+        <div class="card">
+            <h3>🧺 ملابسي</h3>
+            <div class="grid" id="closet"></div>
+        </div>
+
+        <div id="logoutArea">
+            <button onclick="logout()" style="background:#dfe4ea; color:#333; width:100%; margin-bottom:50px">تسجيل الخروج / العودة</button>
+        </div>
+    </div>
+
+    <div id="favPage" class="hidden">
+        <div class="card">
+            <h3>❤️ التنسيقات المفضلة</h3>
             <div id="favorites"></div>
-          </div>
+            <button onclick="toggleFavorites()" style="width:100%; margin-top:15px">العودة للخزانة</button>
         </div>
     </div>
 </div>
 
-<script>
-// دالة لجلب عدد الزيارات من API خارجي مجاني
-function getVisits() {
-    // تم استخدام مفتاح فريد لتطبيق Hendam
-    const namespace = "hendam_app_2025";
-    const key = "unique_visits";
-    
-    fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('visitCount').innerText = `👤 ${data.value}`;
-        })
-        .catch(() => {
-            document.getElementById('visitCount').innerText = "👤 1";
-        });
-}
+<script type="module">
+    import { ref, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-window.addEventListener('load', function() {
-    getVisits(); // استدعاء العداد عند التحميل
-    
-    setTimeout(() => {
-        const loader = document.getElementById('loader');
-        const mainContent = document.getElementById('mainContent');
+    let currentUser = localStorage.getItem("hendam_user");
+    let currentPass = localStorage.getItem("hendam_pass");
+    let closet = [];
+    let favorites = [];
+    let currentOutfit = [];
+
+    window.onload = async () => {
+        if (currentUser) {
+            setupUserUI();
+            await loadUserData();
+        }
         
-        loader.style.opacity = '0'; 
+        // إخفاء اللودر
         setTimeout(() => {
-            loader.style.display = 'none';
-            mainContent.style.display = 'block';
-        }, 500);
-    }, 2500); 
-});
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+        }, 1000);
+    };
 
-let closet = JSON.parse(localStorage.getItem("closet"))||[];
-let favorites = JSON.parse(localStorage.getItem("favorites"))||[];
-let weather = localStorage.getItem("weather")||"hot";
-let currentOutfit=[];
-
-document.getElementById("weather").value=weather;
-
-function saveAll(){
-    localStorage.setItem("closet",JSON.stringify(closet));
-    localStorage.setItem("favorites",JSON.stringify(favorites));
-    localStorage.setItem("weather",weather);
-}
-
-function saveWeather(){
-    weather=document.getElementById("weather").value;
-    saveAll();
-    Swal.fire({ title: 'تم التحديث', text: 'تم تغيير حالة الطقس', icon: 'success', timer: 1500, showConfirmButton: false });
-}
-
-function addItem(){
-    let imgInput=document.getElementById("image");
-    let type=document.getElementById("type").value;
-    let color=document.getElementById("color").value;
-    
-    if(!imgInput.files[0] || !color) {
-        return Swal.fire('تنبيه', 'يرجى اختيار صورة وكتابة اللون', 'warning');
+    function setupUserUI() {
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("mainPage").classList.remove("hidden");
+        document.getElementById("userInfoBar").classList.remove("hidden");
+        document.getElementById("displayId").innerText = "#" + currentUser;
+        document.getElementById("displayPass").innerText = currentPass;
+        document.body.style.paddingTop = "110px"; // تعديل المساحة للشريط العلوي
     }
 
-    let r=new FileReader();
-    r.onload=e=>{
-        closet.push({img:e.target.result, type, color});
-        saveAll();
-        renderCloset();
-        imgInput.value = "";
-        document.getElementById("color").value = "";
-        Swal.fire({ title: 'ممتاز!', text: 'تمت إضافة القطعة بنجاح', icon: 'success', timer: 1500, showConfirmButton: false });
+    window.continueAsGuest = () => {
+        document.getElementById("authSection").classList.add("hidden");
+        document.getElementById("mainPage").classList.remove("hidden");
+        Swal.fire('وضع الضيف', 'مرحباً بك! ملاحظة: لن يتم حفظ بياناتك عند إغلاق المتصفح.', 'info');
     };
-    r.readAsDataURL(imgInput.files[0]);
-}
 
-function renderCloset(){
-    let c=document.getElementById("closet");
-    c.innerHTML= closet.length === 0 ? "<p style='text-align:center; color:#999;'>خزانتك فارغة حالياً</p>" : "";
-    closet.forEach((i,idx)=>{
-        c.innerHTML+=`
-        <div class="item">
-            <img src="${i.img}">
-            <div style="font-weight:bold; margin-top:5px">${i.type}</div>
-            <input style="margin:2px; padding:4px; text-align:center; font-size:12px" value="${i.color}" onchange="editColor(${idx},this.value)">
-            <div class="actions">
-                <button onclick="removeItem(${idx})">🗑️ حذف</button>
-            </div>
-        </div>`;
-    });
-}
-renderCloset();
-
-function editColor(i,val){ closet[i].color=val; saveAll(); }
-
-function removeItem(i){
-    Swal.fire({
-        title: 'هل أنت متأكد؟',
-        text: "سيتم حذف هذه القطعة نهائياً",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'نعم، احذفها',
-        cancelButtonText: 'إلغاء'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            closet.splice(i,1);
-            saveAll();
+    async function loadUserData() {
+        if (!currentUser) return;
+        const snapshot = await get(ref(window.db, 'users/' + currentUser));
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            closet = data.closet || [];
+            favorites = data.favorites || [];
             renderCloset();
         }
-    });
-}
-
-function suggestOutfit(){
-    let shirt=closet.find(i=>i.type=="قميص");
-    let pants=closet.find(i=>i.type=="بنطال");
-    let shoes=closet.find(i=>i.type=="حذاء");
-    let jacket=closet.find(i=>i.type=="جاكيت");
-
-    if(!shirt || !pants || !shoes) {
-        return Swal.fire('نقص في الملابس', 'تحتاج على الأقل إلى (قميص، بنطال، وحذاء) لاقتراح أوتفيت كامل.', 'info');
     }
 
-    currentOutfit=[];
-    currentOutfit.push(shirt, pants, shoes);
-    
-    if(weather=="cold") {
-        if(jacket) currentOutfit.push(jacket);
-        else Swal.fire('الجو بارد!', 'نقترح عليك إضافة "جاكيت" لخزانتك لتكتمل الإطلالة الشتوية.', 'info');
+    async function syncData() {
+        if (currentUser) {
+            await update(ref(window.db, 'users/' + currentUser), {
+                closet: closet,
+                favorites: favorites
+            });
+        }
     }
 
-    let box=document.getElementById("outfit");
-    box.innerHTML="";
-    currentOutfit.forEach(i=>{
-        box.innerHTML+=`<div class="item"><img src="${i.img}"><div>${i.type}</div><small>${i.color}</small></div>`;
-    });
-    document.getElementById("saveFavBtn").classList.remove("hidden");
-}
+    window.addItem = () => {
+        let imgInput = document.getElementById("image");
+        let type = document.getElementById("type").value;
+        let color = document.getElementById("color").value;
+        
+        if(!imgInput.files[0] || !color) return Swal.fire('تنبيه', 'يرجى اختيار صورة وكتابة اللون', 'warning');
 
-function saveFavorite(){
-    if(currentOutfit.length==0) return;
-    favorites.push([...currentOutfit]);
-    saveAll();
-    Swal.fire('تم الحفظ', 'تم إضافة الأوتفيت إلى مفضلتك ❤️', 'success');
-}
+        let r = new FileReader();
+        r.onload = async (e) => {
+            closet.push({img: e.target.result, type, color});
+            if (currentUser) await syncData();
+            renderCloset();
+            Swal.fire('تم', 'أضيفت القطعة بنجاح', 'success');
+        };
+        r.readAsDataURL(imgInput.files[0]);
+    };
 
-function toggleFavorites(){
-    document.getElementById("closetPage").classList.toggle("hidden");
-    document.getElementById("favPage").classList.toggle("hidden");
-    if(!document.getElementById("favPage").classList.contains("hidden")) renderFavorites();
-}
-
-function renderFavorites(){
-    let f=document.getElementById("favorites");
-    f.innerHTML= favorites.length === 0 ? "<p style='text-align:center; color:#999;'>لا توجد تنسيقات محفوظة بعد</p>" : "";
-    favorites.forEach((outfit, idx)=>{
-        let row=`<div style="display:flex; justify-content:space-between; align-items:center"><strong>تنسيق #${idx+1}</strong> <button onclick="deleteFav(${idx})" style="width:auto; background:none; color:red; padding:0">🗑️</button></div><div class='grid' style='margin:10px 0'>`;
-        outfit.forEach(i=>{
-            row+=`<div class="item" style="height:auto"><img src="${i.img}" style="height:60px"><div><small>${i.type}</small></div></div>`;
+    window.renderCloset = () => {
+        let c = document.getElementById("closet");
+        c.innerHTML = closet.length === 0 ? "<p style='text-align:center; color:#999'>خزانتك فارغة حالياً</p>" : "";
+        closet.forEach((i, idx) => {
+            c.innerHTML += `
+            <div class="item">
+                <img src="${i.img}">
+                <div style="font-size:12px; margin-top:5px">${i.type} (${i.color})</div>
+                <button onclick="removeItem(${idx})" style="background:#ff4757; padding:4px 8px; font-size:10px; position:absolute; top:5px; left:5px; width:auto">X</button>
+            </div>`;
         });
-        row+="</div><hr>";
-        f.innerHTML+=row;
-    });
-}
+    };
 
-function deleteFav(i) {
-    favorites.splice(i,1);
-    saveAll();
-    renderFavorites();
-}
+    window.removeItem = async (idx) => {
+        closet.splice(idx, 1);
+        if (currentUser) await syncData();
+        renderCloset();
+    };
+
+    window.suggestOutfit = () => {
+        let shirt = closet.find(i => i.type == "قميص" || i.type == "جاكيت");
+        let pants = closet.find(i => i.type == "بنطال");
+        let shoes = closet.find(i => i.type == "حذاء");
+        
+        if(!shirt || !pants || !shoes) return Swal.fire('عذراً', 'تحتاج لقميص وبنطال وحذاء على الأقل لتوليد اقتراح', 'info');
+        
+        currentOutfit = [shirt, pants, shoes];
+        let box = document.getElementById("outfit");
+        box.innerHTML = "";
+        currentOutfit.forEach(i => {
+            box.innerHTML += `<div class="item"><img src="${i.img}"><div>${i.type}</div></div>`;
+        });
+        document.getElementById("saveFavBtn").classList.remove("hidden");
+    };
+
+    window.saveFavorite = async () => {
+        if (!currentUser) return Swal.fire('عذراً', 'يجب تسجيل الدخول لحفظ التنسيقات في المفضلة', 'warning');
+        favorites.push([...currentOutfit]);
+        await syncData();
+        Swal.fire('تم الحفظ', 'تم إضافة التنسيق للمفضلة', 'success');
+    };
+
+    window.toggleFavorites = () => {
+        if (!currentUser && document.getElementById("favPage").classList.contains("hidden")) {
+            return Swal.fire('تنبيه', 'المفضلة متاحة للمسجلين فقط', 'warning');
+        }
+        document.getElementById("mainPage").classList.toggle("hidden");
+        document.getElementById("favPage").classList.toggle("hidden");
+        if(!document.getElementById("favPage").classList.contains("hidden")) renderFavorites();
+    };
+
+    window.renderFavorites = () => {
+        let f = document.getElementById("favorites");
+        f.innerHTML = favorites.length === 0 ? "<p style='text-align:center; color:#999'>لا توجد تنسيقات محفوظة</p>" : "";
+        favorites.forEach((outfit, idx) => {
+            let row = `<div class='grid' style='margin-bottom:10px; background:#f9f9f9; padding:10px; border-radius:10px'>`;
+            outfit.forEach(i => { row += `<div class="item"><img src="${i.img}" style="height:60px"></div>`; });
+            row += `</div>`;
+            f.innerHTML += row;
+        });
+    };
+
+    window.logout = () => {
+        localStorage.removeItem("hendam_user");
+        localStorage.removeItem("hendam_pass");
+        location.reload();
+    };
 </script>
 
 </body>
