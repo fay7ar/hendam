@@ -12,15 +12,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, set, get, update, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAq2G3dh6WarRBzNc8VJOSNeOu2FJpaLOM",
-            authDomain: "hendam-ly.firebaseapp.com",
-            databaseURL: "https://hendam-ly-default-rtdb.firebaseio.com",
-            projectId: "hendam-ly",
-            storageBucket: "hendam-ly.firebasestorage.app",
-            messagingSenderId: "277250592964",
-            appId: "1:277250592964:web:d4a035703de8f26e2fb991"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDCb2eccEEF48l6mue6MCbkRQvptaCHcWc", authDomain: "algaide-ly1.firebaseapp.com", databaseURL: "https://algaide-ly1-default-rtdb.firebaseio.com", projectId: "algaide-ly1", storageBucket: "algaide-ly1.firebasestorage.app", messagingSenderId: "506924940130", appId: "1:506924940130:web:dc5661c2f8977fd4480a3b", measurementId: "G-CXS4YSQC55" };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -74,9 +66,15 @@
             }
         };
 
-        // عداد الزيارات
+        // عداد الزيارات - تعديل: استخدام sessionStorage بدلاً من localStorage
         const visitRef = ref(db, 'stats/visitCount');
-        runTransaction(visitRef, (currentValue) => (currentValue || 0) + 1);
+        
+        // التحقق إذا كان هذا الزائر قد سجل في هذه الجلسة
+        if (!sessionStorage.getItem("visitCounted")) {
+            runTransaction(visitRef, (currentValue) => (currentValue || 0) + 1);
+            sessionStorage.setItem("visitCounted", "true");
+        }
+        
         onValue(visitRef, (snapshot) => {
             document.getElementById('visitCount').innerText = `👤 زوار الموقع: ${snapshot.val()}`;
         });
@@ -89,10 +87,9 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f4f7f6;
             margin: 0;
-            padding-top: 60px; /* القيمة الافتراضية للضيف */
+            padding-top: 60px;
         }
 
-        /* الهيدر الموحد */
         header {
             background: #111;
             color: #fff;
@@ -108,7 +105,6 @@
             box-sizing: border-box;
         }
 
-        /* شريط البيانات ملتصق تماماً بالهيدر */
         .user-info-bar {
             background: #222;
             color: #eee;
@@ -119,7 +115,7 @@
             align-items: center;
             gap: 20px;
             position: fixed;
-            top: 60px; /* ملتصق بنهاية الهيدر */
+            top: 60px;
             width: 100%;
             z-index: 1000;
             border-bottom: 1px solid #333;
@@ -242,14 +238,35 @@
         document.getElementById("userInfoBar").classList.remove("hidden");
         document.getElementById("displayId").innerText = "#" + currentUser;
         document.getElementById("displayPass").innerText = currentPass;
-        document.body.style.paddingTop = "95px"; // مساحة للهيدر المزدوج
+        document.body.style.paddingTop = "95px";
     }
 
+    // تعديل: إضافة إعلان عند أول دخول كضيف في كل جلسة
     window.continueAsGuest = () => {
+        // التحقق إذا كان هذا أول دخول كضيف في هذه الجلسة
+        if (!sessionStorage.getItem("guestAdShown")) {
+            // عرض إعلان (رابط)
+            Swal.fire({
+                title: 'إعلان',
+                html: '<a href="https://drainalmost.com/dqa0dckdfs?key=930517b22ee9b8161430d8aaeb557113" target="_blank" style="color:blue; font-size:18px;">اضغط هنا لمشاهدة الإعلان</a>',
+                icon: 'info',
+                confirmButtonText: 'تم'
+            }).then(() => {
+                // بعد مشاهدة الإعلان، نفتح وضع الضيف
+                sessionStorage.setItem("guestAdShown", "true");
+                openGuestMode();
+            });
+        } else {
+            // إذا سبق وشاهد الإعلان في هذه الجلسة، ندخل مباشرة
+            openGuestMode();
+        }
+    };
+
+    function openGuestMode() {
         document.getElementById("authSection").classList.add("hidden");
         document.getElementById("mainPage").classList.remove("hidden");
         Swal.fire('وضع الضيف', 'يمكنك الاستخدام الآن، لكن لن يتم حفظ البيانات عند الخروج.', 'info');
-    };
+    }
 
     async function loadUserData() {
         if (!currentUser) return;
