@@ -1,1391 +1,1064 @@
 <!DOCTYPE html>
-
 <html lang="ar" dir="rtl">
-
 <head>
-
   <meta charset="UTF-8">
-
   <title>Hendam | هندام</title>
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <link rel="icon" type="image/png" href="https://www2.0zz0.com/2025/12/21/18/455656802.png">
-
   <link rel="apple-touch-icon" href="https://www2.0zz0.com/2025/12/21/18/455656802.png">
-
   <!-- SweetAlert2 -->
-
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
   <style>
-
     * { box-sizing: border-box; }
-
     body {
-
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
       background: #f4f7f6;
-
       margin: 0;
-
       padding-top: 60px;
-
     }
-
     header {
-
       background: #111;
-
       color: #fff;
-
       padding: 0 15px;
-
       display: flex;
-
       justify-content: space-between;
-
       align-items: center;
-
       position: fixed;
-
       top: 0;
-
       width: 100%;
-
       height: 60px;
-
       z-index: 1001;
-
     }
-
     .user-info-bar {
-
       background: #222;
-
       color: #eee;
-
       font-size: .8rem;
-
       height: 35px;
-
       display: flex;
-
       justify-content: center;
-
       align-items: center;
-
       gap: 20px;
-
       position: fixed;
-
       top: 60px;
-
       width: 100%;
-
       z-index: 1000;
-
       border-bottom: 1px solid #333;
-
     }
-
     .user-info-bar span { color: #ff4757; font-weight: 700; margin-right: 5px; }
-
     .container { padding: 15px; max-width: 600px; margin: auto; }
-
     .card {
-
       background: #fff;
-
       padding: 15px;
-
       border-radius: 15px;
-
       margin-bottom: 15px;
-
       box-shadow: 0 4px 12px rgba(0,0,0,.05);
-
     }
-
     .grid {
-
       display: grid;
-
       grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-
       gap: 12px;
-
     }
-
     .item {
-
       background: #fff;
-
       border: 1px solid #eee;
-
       border-radius: 12px;
-
       padding: 8px;
-
       text-align: center;
-
       position: relative;
-
     }
-
     .item img {
-
       width: 100%;
-
       height: 130px;
-
       object-fit: cover;
-
       border-radius: 10px;
-
     }
-
     button {
-
       background: #111;
-
       color: #fff;
-
       border: none;
-
       cursor: pointer;
-
       font-weight: 700;
-
       border-radius: 10px;
-
       padding: 12px;
-
       width: 100%;
-
       transition: .3s;
-
       margin-top: 10px;
-
     }
-
     button:active { transform: scale(.98); }
-
     .btn-fav {
-
       background: 0 0;
-
       width: auto;
-
       font-size: 0;
-
       padding: 8px;
-
       margin: 0;
-
       display: flex;
-
       align-items: center;
-
       justify-content: center;
-
     }
-
     .btn-fav svg {
-
       width: 26px;
-
       height: 26px;
-
       stroke: white;
-
       fill: none;
-
       transition: .2s;
-
     }
-
     .btn-fav.active svg { fill: #ff4757; stroke: #ff4757; }
-
     .btn-delete {
-
       background: #ff4757;
-
       padding: 4px 8px;
-
       font-size: 10px;
-
       position: absolute;
-
       top: 5px;
-
       left: 5px;
-
       width: auto;
-
       margin: 0;
-
     }
-
     .upload-wrapper {
-
       display: flex;
-
       flex-direction: column;
-
       gap: 8px;
-
       margin-bottom: 15px;
-
     }
-
     .custom-upload {
-
       background: #f0f3f4;
-
       border: 2px dashed #aaa;
-
       border-radius: 16px;
-
       padding: 20px;
-
       text-align: center;
-
       cursor: pointer;
-
       transition: .2s;
-
       display: flex;
-
       flex-direction: column;
-
       align-items: center;
-
       gap: 8px;
-
     }
-
     .custom-upload:hover { background: #e0e4e5; border-color: #2ed573; }
-
     .custom-upload svg { width: 36px; height: 36px; stroke: #2f3542; stroke-width: 1.8; }
-
     .custom-upload span { color: #2f3542; font-size: .9rem; }
-
     #image { display: none; }
-
     input, select {
-
       width: 100%;
-
       padding: 10px;
-
       margin-bottom: 10px;
-
       border-radius: 8px;
-
       border: 1px solid #ddd;
-
       box-sizing: border-box;
-
     }
-
     #loader {
-
       position: fixed;
-
       top: 0; left: 0;
-
       width: 100%; height: 100%;
-
       background: #fff;
-
       display: flex;
-
       flex-direction: column;
-
       justify-content: center;
-
       align-items: center;
-
       z-index: 9999;
-
       transition: opacity .5s;
-
     }
-
     #loader img { width: 180px; animation: pulse 2s infinite ease-in-out; }
-
     @keyframes pulse {
-
       0% { transform: scale(.95); opacity: .8; }
-
       50% { transform: scale(1); opacity: 1; }
-
       100% { transform: scale(.95); opacity: .8; }
-
     }
-
     .hidden { display: none !important; }
-
     .user-counter {
-
       font-size: .7rem;
-
       color: #bbb;
-
       display: flex;
-
       align-items: center;
-
       gap: 4px;
-
     }
-
     .user-counter svg { width: 14px; height: 14px; stroke: #bbb; }
-
+    
     /* الزر العائم للمشاركة */
-
     .float-share {
-
       position: fixed;
-
       bottom: 25px;
-
       right: 25px;
-
       background-color: #5CC3FF;
-
       width: 60px;
-
       height: 60px;
-
       border-radius: 50%;
-
       display: flex;
-
       align-items: center;
-
       justify-content: center;
-
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-
       cursor: pointer;
-
       transition: 0.2s;
-
       z-index: 2000;
-
       border: none;
-
       padding: 0;
-
     }
-
     .float-share:hover { transform: scale(1.05); background-color: #4aa3df; }
-
     .float-share svg {
-
       width: 32px;
-
       height: 32px;
-
       fill: white;
-
       stroke: none;
-
     }
-
-    .share-modal {
-
-      display: flex;
-
-      flex-direction: column;
-
-      gap: 20px;
-
-      align-items: center;
-
-      padding: 10px;
-
-    }
-
-    .share-link-box {
-
-      background: #f0f0f0;
-
-      padding: 15px;
-
-      border-radius: 30px;
-
-      width: 100%;
-
-      text-align: center;
-
-      direction: ltr;
-
-      font-size: 0.9rem;
-
-      word-break: break-all;
-
-      font-family: monospace;
-
-      border: 1px solid #ddd;
-
-    }
-
-    .share-buttons {
-
-      display: flex;
-
-      flex-wrap: wrap;
-
-      gap: 15px;
-
-      justify-content: center;
-
-      margin: 10px 0;
-
-    }
-
-    .share-buttons a {
-
-      background: #e2e2e2;
-
-      border-radius: 50px;
-
-      padding: 12px 20px;
-
-      text-decoration: none;
-
-      color: black;
-
-      font-weight: 600;
-
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 10px;
-
-      transition: 0.2s;
-
-      min-width: 120px;
-
-      justify-content: center;
-
-    }
-
-    .share-buttons a:hover { background: #d0d0d0; transform: translateY(-2px); }
-
-    .copy-btn {
-
-      background: #5CC3FF;
-
-      color: white;
-
-      border: none;
-
-      padding: 12px 30px;
-
-      border-radius: 50px;
-
-      font-weight: bold;
-
+    
+    /* إعلان عائم */
+    .ad-float {
+      position: fixed;
+      bottom: 100px;
+      left: 15px;
+      width: 150px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 1500;
+      overflow: hidden;
+      border: 2px solid #5CC3FF;
+      transition: 0.3s;
       cursor: pointer;
-
-      font-size: 1.1rem;
-
-      display: inline-flex;
-
-      align-items: center;
-
-      gap: 10px;
-
-      transition: 0.2s;
-
     }
-
-    .copy-btn:hover { background: #4aa3df; transform: scale(1.05); }
-
-    
-
-    /* تنسيق أيقونات SVG */
-
-    .social-icon {
-
+    .ad-float img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+    }
+    .ad-float .ad-content {
+      padding: 8px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .ad-close {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
       width: 24px;
-
       height: 24px;
-
-      fill: currentColor;
-
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 1501;
+      padding: 0;
+      margin: 0;
     }
-
+    .ad-close:hover { background: rgba(255,0,0,0.8); }
     
-
+    .share-modal {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: center;
+      padding: 10px;
+    }
+    .share-link-box {
+      background: #f0f0f0;
+      padding: 15px;
+      border-radius: 30px;
+      width: 100%;
+      text-align: center;
+      direction: ltr;
+      font-size: 0.9rem;
+      word-break: break-all;
+      font-family: monospace;
+      border: 1px solid #ddd;
+    }
+    .share-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin: 10px 0;
+    }
+    .share-buttons a {
+      background: #e2e2e2;
+      border-radius: 50px;
+      padding: 12px 20px;
+      text-decoration: none;
+      color: black;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.2s;
+      min-width: 120px;
+      justify-content: center;
+    }
+    .share-buttons a:hover { background: #d0d0d0; transform: translateY(-2px); }
+    .copy-btn {
+      background: #5CC3FF;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1.1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: 0.2s;
+    }
+    .copy-btn:hover { background: #4aa3df; transform: scale(1.05); }
+    
+    /* تنسيق أيقونات SVG */
+    .social-icon {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    
     /* تنسيق نافذة اختيار الجو */
-
     .swal2-popup {
-
       font-size: 1.2rem !important;
-
     }
-
     .swal2-select {
-
       width: 90% !important;
-
       margin: 20px auto !important;
-
       padding: 15px !important;
-
       font-size: 1.1rem !important;
-
       border-radius: 15px !important;
-
       border: 2px solid #5CC3FF !important;
-
     }
-
+    
+    /* تنسيق الجنس والمدينة */
+    .gender-selector {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .gender-option {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 15px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    .gender-option.selected {
+      border-color: #5CC3FF;
+      background: #e3f2fd;
+    }
+    .gender-option.male.selected { border-color: #2ed573; background: #e8f5e9; }
+    .gender-option.female.selected { border-color: #ff4757; background: #fee; }
+    .city-search {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #5CC3FF;
+      border-radius: 30px;
+      margin: 10px 0;
+      font-size: 1rem;
+    }
+    .cities-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #eee;
+      border-radius: 15px;
+      padding: 5px;
+    }
+    .city-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+      transition: 0.1s;
+    }
+    .city-item:hover { background: #f0f7ff; }
+    .city-item.selected { background: #5CC3FF; color: white; }
+    
+    /* مؤشر المستخدمين النشطين - تم إخفاؤه */
+    .active-users-badge {
+      display: none;
+    }
   </style>
-
 </head>
-
 <body>
-
 <div id="loader">
-
   <img src="https://www2.0zz0.com/2025/12/21/18/455656802.png" alt="Hendam Logo">
-
   <div style="margin-top:20px;color:#555">جاري تحضير خزانتك الذكية...</div>
-
 </div>
 
 <header>
-
-  <div id="visitCount" class="user-counter">...</div>
-
-  <div style="font-weight:bold;font-size:1.2rem;">Hendam 🕶️</div>
-
+  <div id="visitCount" class="user-counter">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M5 20v-2a7 7 0 0 1 14 0v2"/>
+    </svg>
+    <span>جاري التحميل...</span>
+  </div>
+  <div style="font-weight:bold;font-size:1.2rem; display: flex; align-items: center;">
+    Hendam 🕶️
+  </div>
   <button onclick="toggleFavorites()" class="btn-fav" aria-label="المفضلة">
-
     <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-
   </button>
-
 </header>
 
 <div id="userInfoBar" class="user-info-bar hidden">
-
   <div>رقم الخزانة: <span id="displayId">0000</span></div>
-
   <div>كلمة السر: <span id="displayPass">****</span></div>
-
+  <div>الجنس: <span id="displayGender">-</span></div>
 </div>
 
 <!-- زر المشاركة العائم -->
-
 <div class="float-share" onclick="openShareModal()" id="shareFab" title="مشاركة التطبيق">
-
   <svg viewBox="0 0 24 24" width="32" height="32">
-
     <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
-
   </svg>
-
 </div>
 
+<!-- مكان عرض الإعلانات العائمة -->
+<div id="adContainer"></div>
+
 <div class="container">
-
   <!-- شاشة Auth -->
-
   <div id="authSection" class="card" style="text-align:center">
-
     <img src="https://www2.0zz0.com/2025/12/21/18/455656802.png" style="width:80px;margin-bottom:15px">
-
     <h3>مرحباً بك في هندام</h3>
-
     <p style="color:#666;font-size:.9rem">خزانتك الذكية في جيبك. سجل الآن لحفظ ملابسك وتنسيقاتك.</p>
-
     <button onclick="registerUser()">إنشاء خزانة جديدة</button>
-
     <button onclick="loginUser()" style="background:#444">تسجيل الدخول</button>
-
-    <button onclick="continueAsGuest()" style="background:#57606f">المتابعة كضيف 🔓</button>
-
+    <button onclick="continueAsGuest()" style="background:#57606f">المتابعة كزائر 🔓​</button>
   </div>
 
   <!-- الصفحة الرئيسية (الخزانة) -->
-
   <div id="mainPage" class="hidden">
-
     <div class="card">
-
       <h3>➕ إضافة قطعة</h3>
-
       <div class="upload-wrapper">
-
         <label for="image" class="custom-upload">
-
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-
             <rect x="2" y="2" width="20" height="20" rx="2.18"/>
-
             <path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/>
-
             <circle cx="12" cy="12" r="3"/>
-
           </svg>
-
           <span>انقر لاختيار صورة</span>
-
         </label>
-
         <input type="file" id="image" accept="image/*">
-
       </div>
-
       <select id="type">
-
         <option>قميص</option>
-
         <option>بنطال</option>
-
         <option>حذاء</option>
-
         <option>جاكيت</option>
-
       </select>
-
       <input id="color" placeholder="اللون (مثال: أبيض)">
-
-      <!-- حقل الوزن (خفيف / ثقيل) -->
-
       <select id="weight">
-
         <option value="خفيف">خفيف (صيفي)</option>
-
         <option value="ثقيل">ثقيل (شتوي)</option>
-
       </select>
-
       <button onclick="addItem()" style="background:#2ed573">إضافة للخزانة</button>
-
     </div>
 
     <div class="card">
-
       <h3>🧠 اقتراح ذكي (مراعي للجو)</h3>
-
       <button onclick="suggestOutfitWithWeather()" style="background:#2f3542">🌡️ توليد تنسيق مناسب</button>
-
       <div class="grid" id="outfit" style="margin-top:15px"></div>
-
       <button id="saveFavBtn" class="hidden" onclick="saveFavorite()" style="background:#ff4757">
-
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-left:6px">
-
           <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-
         </svg> حفظ في المفضلة
-
       </button>
-
     </div>
 
     <div class="card">
-
       <h3>🧺 ملابسي</h3>
-
       <div class="grid" id="closet"></div>
-
     </div>
 
     <button onclick="logout()" style="background:#dfe4ea;color:#333;margin-bottom:50px">تسجيل الخروج / العودة للرئيسية</button>
-
   </div>
 
   <!-- صفحة المفضلة -->
-
   <div id="favPage" class="hidden">
-
     <div class="card">
-
       <h3>❤️ التنسيقات المفضلة</h3>
-
       <div id="favorites"></div>
-
       <button onclick="toggleFavorites()">العودة للخزانة</button>
-
     </div>
-
   </div>
-
 </div>
 
 <script type="module">
-
   // ==================== Firebase ====================
-
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-
-  import { getDatabase, ref, set, get, update, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  import { getDatabase, ref, set, get, update, onValue, runTransaction, remove, onDisconnect } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
   const firebaseConfig = {
-
     apiKey: "AIzaSyDCb2eccEEF48l6mue6MCbkRQvptaCHcWc",
-
     authDomain: "algaide-ly1.firebaseapp.com",
-
     databaseURL: "https://algaide-ly1-default-rtdb.firebaseio.com",
-
     projectId: "algaide-ly1",
-
     storageBucket: "algaide-ly1.firebasestorage.app",
-
     messagingSenderId: "506924940130",
-
     appId: "1:506924940130:web:dc5661c2f8977fd4480a3b",
-
     measurementId: "G-CXS4YSQC55"
-
   };
 
   const app = initializeApp(firebaseConfig);
-
   const db = getDatabase(app);
-
   window.db = db;
 
   // ==================== الإعدادات العامة ====================
-
   let currentUserId = localStorage.getItem("hendam_user");
-
   let currentPass = localStorage.getItem("hendam_pass");
+  let currentUserGender = localStorage.getItem("hendam_gender") || "ذكر";
+  let currentUserCity = localStorage.getItem("hendam_city") || "";
+  
+  let closetItems = [];
+  let favoriteOutfits = [];
+  let lastSuggestedOutfit = [];
+  let allUsers = [];
+  let ads = []; // الإعلانات من لوحة التحكم
 
-  let closetItems = [];         // { img, type, color, weight }
+  // قائمة المدن الليبية
+  const libyanCities = [
+    "بنغازي", "طرابلس", "سبها", "الخمس", "مصراتة", "زليتن", "الشاطي", 
+    "أجدابيا", "صبراتة", "البيضاء", "المرج", "أوباري", "تراغن", 
+    "غات", "غدامس", "أخرى"
+  ];
 
-  let favoriteOutfits = [];     // array of arrays (كل مجموعة 3-4 قطع)
+  // ==================== نظام المستخدمين النشطين ====================
+  let userPresenceRef;
+  let lastHeartbeatTime = Date.now();
+  const HEARTBEAT_INTERVAL = 30000; // 30 ثانية
+  const USER_TIMEOUT = 60000; // 60 ثانية (يعتبر غير نشط بعد دقيقة)
 
-  let lastSuggestedOutfit = []; // آخر تنسيق مقترح
+  function initPresence() {
+    if (!currentUserId) return;
+    
+    const connectedRef = ref(db, '.info/connected');
+    userPresenceRef = ref(db, `presence/${currentUserId}`);
+    
+    onValue(connectedRef, (snap) => {
+      if (snap.val() === true) {
+        // عند الاتصال، سجل المستخدم كنشط
+        set(userPresenceRef, {
+          online: true,
+          lastSeen: Date.now(),
+          userId: currentUserId,
+          gender: currentUserGender,
+          city: currentUserCity
+        });
+        
+        // عند قطع الاتصال، احذف المستخدم تلقائياً
+        onDisconnect(userPresenceRef).remove();
+        
+        // بدء إرسال نبضات القلب
+        startHeartbeat();
+      }
+    });
+  }
+
+  function startHeartbeat() {
+    // تحديث آخر نشاط كل 30 ثانية
+    setInterval(() => {
+      if (currentUserId) {
+        set(ref(db, `presence/${currentUserId}/lastSeen`), Date.now());
+        set(ref(db, `presence/${currentUserId}/online`), true);
+      }
+    }, HEARTBEAT_INTERVAL);
+  }
+
+  // دالة لحساب عدد المستخدمين النشطين (داخلية فقط)
+  function countActiveUsers() {
+    const presenceRef = ref(db, 'presence');
+    onValue(presenceRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const now = Date.now();
+        const activeUsers = [];
+        
+        snapshot.forEach((childSnapshot) => {
+          const userData = childSnapshot.val();
+          // المستخدم نشط إذا كان آخر ظهور له خلال الدقيقة الأخيرة
+          if (userData.online && (now - userData.lastSeen) < USER_TIMEOUT) {
+            activeUsers.push({
+              id: childSnapshot.key,
+              ...userData
+            });
+          } else {
+            // تنظيف المستخدمين غير النشطين
+            remove(ref(db, `presence/${childSnapshot.key}`));
+          }
+        });
+      }
+    });
+  }
+
+  // ==================== تحميل الإعلانات ====================
+  async function loadAds() {
+    const snapshot = await get(ref(db, 'ads'));
+    if (snapshot.exists()) {
+      ads = Object.values(snapshot.val());
+      // التحقق من أن الصفحة الحالية هي الصفحة الرئيسية قبل عرض الإعلان
+      if (!document.getElementById('mainPage').classList.contains('hidden')) {
+        showRandomAd();
+      }
+    }
+  }
+
+  function showRandomAd() {
+    if (!ads || ads.length === 0) return;
+    
+    // تصفية الإعلانات حسب جنس المستخدم إذا كان مسجل
+    let filteredAds = ads;
+    if (currentUserId && currentUserGender) {
+      filteredAds = ads.filter(ad => ad.gender === 'all' || ad.gender === currentUserGender);
+    }
+    
+    if (filteredAds.length === 0) return;
+    
+    const randomAd = filteredAds[Math.floor(Math.random() * filteredAds.length)];
+    const adContainer = document.getElementById('adContainer');
+    
+    adContainer.innerHTML = `
+      <div class="ad-float" id="floatingAd">
+        <button class="ad-close" onclick="closeAd()">✕</button>
+        <img src="${randomAd.image}" alt="إعلان" onclick="window.open('${randomAd.link}', '_blank')">
+        <div class="ad-content" onclick="window.open('${randomAd.link}', '_blank')">
+          ${randomAd.title || 'منتج مميز'}
+        </div>
+      </div>
+    `;
+  }
+
+  window.closeAd = function() {
+    document.getElementById('floatingAd')?.remove();
+  };
 
   // ==================== Firebase Authentication Helpers ====================
-
   window.registerUser = async () => {
+    let selectedGender = '';
+    let selectedCity = '';
+
+    // نافذة اختيار الجنس والمدينة
+    const { value: formData } = await Swal.fire({
+      title: 'إنشاء خزانة جديدة',
+      html: `
+        <div style="margin: 20px 0">
+          <h4>اختر جنسك:</h4>
+          <div class="gender-selector">
+            <div class="gender-option male" onclick="window.selectGender('ذكر')">👨 ذكر</div>
+            <div class="gender-option female" onclick="window.selectGender('أنثى')">👩 أنثى</div>
+          </div>
+          <input type="hidden" id="selectedGender" value="">
+          
+          <h4 style="margin-top: 20px">اختر مدينتك:</h4>
+          <input type="text" id="citySearch" class="city-search" placeholder="ابحث عن مدينة...">
+          <div class="cities-list" id="citiesList">
+            ${libyanCities.map(city => `<div class="city-item" onclick="window.selectCity('${city}')">${city}</div>`).join('')}
+          </div>
+          <input type="hidden" id="selectedCity" value="">
+        </div>
+      `,
+      showConfirmButton: true,
+      confirmButtonText: 'متابعة',
+      showCancelButton: true,
+      cancelButtonText: 'إلغاء',
+      didOpen: () => {
+        window.selectGender = (gender) => {
+          selectedGender = gender;
+          document.getElementById('selectedGender').value = gender;
+          document.querySelectorAll('.gender-option').forEach(el => {
+            el.classList.remove('selected');
+          });
+          event.target.classList.add('selected');
+        };
+        
+        window.selectCity = (city) => {
+          selectedCity = city;
+          document.getElementById('selectedCity').value = city;
+          document.querySelectorAll('.city-item').forEach(el => {
+            el.classList.remove('selected');
+          });
+          event.target.classList.add('selected');
+        };
+        
+        document.getElementById('citySearch').addEventListener('input', (e) => {
+          const search = e.target.value.toLowerCase();
+          const citiesList = document.getElementById('citiesList');
+          citiesList.innerHTML = libyanCities
+            .filter(city => city.toLowerCase().includes(search))
+            .map(city => `<div class="city-item" onclick="window.selectCity('${city}')">${city}</div>`)
+            .join('');
+        });
+      },
+      preConfirm: () => {
+        if (!selectedGender) {
+          Swal.showValidationMessage('الرجاء اختيار الجنس');
+          return false;
+        }
+        if (!selectedCity) {
+          Swal.showValidationMessage('الرجاء اختيار المدينة');
+          return false;
+        }
+        return { gender: selectedGender, city: selectedCity };
+      }
+    });
+
+    if (!formData) return;
 
     const userId = Math.floor(1000 + Math.random() * 9000).toString();
-
+    
     const { value: password } = await Swal.fire({
-
-      title: 'مرحباً بك في هندام',
-
-      text: `رقمك التعريفي الجديد هو: ${userId}. يرجى تعيين كلمة مرور:`,
-
+      title: 'كلمة المرور',
+      text: `رقمك التعريفي: ${userId}. أدخل كلمة المرور:`,
       input: 'password',
-
       inputPlaceholder: 'كلمة المرور',
-
       allowOutsideClick: false,
-
       confirmButtonText: 'حفظ والدخول',
-
-      footer: '<b style="color:red">⚠️ يرجى تصوير الشاشة وحفظ الرقم السري!</b>'
-
+      footer: '<b style="color:red">⚠️ احفظ الرقم السري!</b>'
     });
 
     if (password) {
-
-      await set(ref(db, 'users/' + userId), { password: password, closet: [], favorites: [] });
-
+      await set(ref(db, 'users/' + userId), { 
+        password: password, 
+        gender: formData.gender,
+        city: formData.city,
+        closet: [], 
+        favorites: [],
+        registeredAt: new Date().toISOString()
+      });
+      
       localStorage.setItem("hendam_user", userId);
-
       localStorage.setItem("hendam_pass", password);
-
+      localStorage.setItem("hendam_gender", formData.gender);
+      localStorage.setItem("hendam_city", formData.city);
+      
       location.reload();
-
     }
-
   };
 
   window.loginUser = async () => {
-
     const { value: formValues } = await Swal.fire({
-
       title: 'تسجيل الدخول',
-
-      html: '<input id="swal-input1" class="swal2-input" placeholder="الرقم التعريفي">' +
-
-            '<input id="swal-input2" type="password" class="swal2-input" placeholder="كلمة المرور">',
-
+      html: `
+        <input id="swal-input1" class="swal2-input" placeholder="الرقم التعريفي">
+        <input id="swal-input2" type="password" class="swal2-input" placeholder="كلمة المرور">
+        <div style="margin-top: 10px">
+          <a href="#" onclick="window.forgotPassword()" style="color: #5CC3FF; text-decoration: none;">نسيت كلمة السر؟</a>
+        </div>
+      `,
       focusConfirm: false,
-
-      preConfirm: () => [document.getElementById('swal-input1').value, document.getElementById('swal-input2').value]
-
+      preConfirm: () => [
+        document.getElementById('swal-input1').value,
+        document.getElementById('swal-input2').value
+      ]
     });
 
     if (formValues) {
-
       const [id, pass] = formValues;
-
       const snapshot = await get(ref(db, 'users/' + id));
-
+      
       if (snapshot.exists() && snapshot.val().password === pass) {
-
+        const userData = snapshot.val();
         localStorage.setItem("hendam_user", id);
-
         localStorage.setItem("hendam_pass", pass);
-
+        localStorage.setItem("hendam_gender", userData.gender || 'ذكر');
+        localStorage.setItem("hendam_city", userData.city || '');
         location.reload();
-
       } else {
-
         Swal.fire('خطأ', 'البيانات غير صحيحة', 'error');
-
       }
-
     }
-
   };
 
-  // عداد الزوار
+  window.forgotPassword = () => {
+    const phoneNumber = "0928666754";
+    const message = "نسيت كلمة سر خزانتي على هندام";
+    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`, '_blank');
+  };
 
-  const visitRef = ref(db, 'stats/visitCount');
-
-  if (!sessionStorage.getItem("visitCounted")) {
-
-    runTransaction(visitRef, (currentValue) => (currentValue || 0) + 1);
-
-    sessionStorage.setItem("visitCounted", "true");
-
+  // عداد المستخدمين المسجلين
+  async function updateRegisteredUsersCount() {
+    const snapshot = await get(ref(db, 'users'));
+    if (snapshot.exists()) {
+      const users = snapshot.val();
+      const registeredCount = Object.keys(users).length;
+      document.getElementById('visitCount').innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-left:4px">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M5 20v-2a7 7 0 0 1 14 0v2"/>
+        </svg> المستخدمين: ${registeredCount}
+      `;
+    }
   }
 
-  onValue(visitRef, (snapshot) => {
-
-    document.getElementById('visitCount').innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle; margin-left:4px"><circle cx="12" cy="8" r="4"/><path d="M5 20v-2a7 7 0 0 1 14 0v2"/></svg> زوار الموقع: ${snapshot.val()}`;
-
-  });
-
   // ==================== تحميل البيانات ====================
-
   window.onload = async () => {
-
     if (currentUserId) {
-
       showUserBar();
-
       await loadUserData();
-
+      initPresence(); // بدء تتبع النشاط
     }
-
+    
+    await loadAds();
+    await updateRegisteredUsersCount();
+    
+    // بدء مراقبة المستخدمين النشطين (داخلياً فقط)
+    countActiveUsers();
+    setInterval(countActiveUsers, 10000); // تحديث كل 10 ثوان
+    
     setTimeout(() => {
-
       document.getElementById('loader').style.opacity = '0';
-
       setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
-
     }, 1000);
-
   };
 
   function showUserBar() {
-
     document.getElementById("authSection").classList.add("hidden");
-
     document.getElementById("mainPage").classList.remove("hidden");
-
     document.getElementById("userInfoBar").classList.remove("hidden");
-
     document.getElementById("displayId").innerText = "#" + currentUserId;
-
     document.getElementById("displayPass").innerText = currentPass;
-
+    document.getElementById("displayGender").innerText = currentUserGender; // إزالة الإيموجي
     document.body.style.paddingTop = "95px";
-
   }
 
   window.continueAsGuest = () => {
-
-    if (!sessionStorage.getItem("guestAdShown")) {
-
-      Swal.fire({
-
-        title: 'إعلان',
-
-        html: '<a href="https://drainalmost.com/dqa0dckdfs?key=930517b22ee9b8161430d8aaeb557113" target="_blank" style="color:blue; font-size:18px;">اضغط هنا لمشاهدة الإعلان</a>',
-
-        icon: 'info',
-
-        confirmButtonText: 'تم'
-
-      }).then(() => {
-
-        sessionStorage.setItem("guestAdShown", "true");
-
-        enterGuestMode();
-
-      });
-
-    } else {
-
-      enterGuestMode();
-
-    }
-
+    document.getElementById("authSection").classList.add("hidden");
+    document.getElementById("mainPage").classList.remove("hidden");
+    Swal.fire('وضع الزائر', 'يمكنك تصفح التطبيق، لكن لن يتم حفظ البيانات.', 'info');
   };
 
-  function enterGuestMode() {
-
-    document.getElementById("authSection").classList.add("hidden");
-
-    document.getElementById("mainPage").classList.remove("hidden");
-
-    Swal.fire('وضع الضيف', 'يمكنك الاستخدام الآن، لكن لن يتم حفظ البيانات عند الخروج.', 'info');
-
-  }
-
   async function loadUserData() {
-
     if (!currentUserId) return;
-
     const snapshot = await get(ref(db, 'users/' + currentUserId));
-
     if (snapshot.exists()) {
-
       const data = snapshot.val();
-
       closetItems = data.closet || [];
-
       favoriteOutfits = data.favorites || [];
-
       renderCloset();
-
     }
-
   }
 
   async function saveToFirebase() {
-
     if (currentUserId) {
-
-      await update(ref(db, 'users/' + currentUserId), { closet: closetItems, favorites: favoriteOutfits });
-
+      await update(ref(db, 'users/' + currentUserId), { 
+        closet: closetItems, 
+        favorites: favoriteOutfits 
+      });
     }
-
   }
 
   // ==================== إدارة الخزانة ====================
-
   window.addItem = () => {
-
     let imgInput = document.getElementById("image");
-
     let type = document.getElementById("type").value;
-
     let color = document.getElementById("color").value.trim();
-
     let weight = document.getElementById("weight").value;
 
     if (!imgInput.files[0] || !color) return Swal.fire('تنبيه', 'أكمل البيانات (الصورة واللون)', 'warning');
 
     let reader = new FileReader();
-
     reader.onload = async (e) => {
-
       closetItems.push({ img: e.target.result, type, color, weight });
-
       if (currentUserId) await saveToFirebase();
-
       renderCloset();
-
       Swal.fire('تم', 'أضيفت القطعة بنجاح', 'success');
-
       imgInput.value = '';
-
       document.querySelector('.custom-upload span').innerText = 'انقر لاختيار صورة';
-
     };
-
     reader.readAsDataURL(imgInput.files[0]);
-
     document.querySelector('.custom-upload span').innerText = 'جاري التحميل...';
-
   };
 
   window.renderCloset = () => {
-
     let c = document.getElementById("closet");
-
     if (closetItems.length === 0) {
-
       c.innerHTML = "<p style='text-align:center; color:#999'>لا توجد ملابس</p>";
-
       return;
-
     }
-
     c.innerHTML = "";
-
     closetItems.forEach((item, idx) => {
-
       c.innerHTML += `<div class="item"><img src="${item.img}"><div style="font-size:12px; margin-top:5px">${item.type} (${item.color})</div><button onclick="deleteItem(${idx})" class="btn-delete">✕</button></div>`;
-
     });
-
   };
 
   window.deleteItem = async (idx) => {
-
     closetItems.splice(idx, 1);
-
     if (currentUserId) await saveToFirebase();
-
     renderCloset();
-
   };
 
-  // ==================== خوارزمية ذكية متقدمة (مراعاة اللون والجو) ====================
-
+  // ==================== خوارزمية ذكية ====================
   window.suggestOutfitWithWeather = async () => {
-
-    // طلب اختيار الجو - مع تكبير النافذة
-
     const { value: weather } = await Swal.fire({
-
       title: 'اختر جو اليوم',
-
       text: 'حدد نوع الطقس لتوليد تنسيق مناسب',
-
       input: 'select',
-
       inputOptions: { دافئ: '☀️ دافئ (صيفي)', بارد: '❄️ بارد (شتوي)' },
-
       inputPlaceholder: 'اختر نوع الجو...',
-
       showCancelButton: true,
-
       confirmButtonText: '✨ توليد التنسيق',
-
       cancelButtonText: 'إلغاء',
-
       width: '500px',
-
       padding: '2em',
-
-      background: '#fff',
-
-      backdrop: `
-
-        rgba(0,0,0,0.4)
-
-        url("https://www2.0zz0.com/2025/12/21/18/455656802.png")
-
-        left top
-
-        no-repeat
-
-      `,
-
-      customClass: {
-
-        popup: 'swal2-popup',
-
-        select: 'swal2-select'
-
-      }
-
+      background: '#fff'
     });
 
     if (!weather) return;
 
-    // فلترة حسب الوزن (ثقيل للبارد، خفيف للدافئ)
-
     const targetWeight = (weather === 'بارد') ? 'ثقيل' : 'خفيف';
-
     const possibleShirts = closetItems.filter(i => (i.type === 'قميص' || i.type === 'جاكيت') && i.weight === targetWeight);
-
     const possiblePants = closetItems.filter(i => i.type === 'بنطال' && i.weight === targetWeight);
-
     const possibleShoes = closetItems.filter(i => i.type === 'حذاء' && i.weight === targetWeight);
 
     if (possibleShirts.length === 0 || possiblePants.length === 0 || possibleShoes.length === 0) {
-
-      return Swal.fire('عذراً', `لا توجد قطع كافية تناسب الجو ${weather} (${targetWeight === 'ثقيل' ? 'شتوي' : 'صيفي'}). أضف المزيد.`, 'info');
-
+      return Swal.fire('عذراً', `لا توجد قطع كافية تناسب الجو ${weather}`, 'info');
     }
 
-    // دالة اختيار عشوائي مع محاولة تجنب تكرار الألوان
-
     function selectDistinctColors(shirtsArr, pantsArr, shoesArr) {
-
-      // عمل نسخ
-
       let availableShirts = [...shirtsArr];
-
       let availablePants = [...pantsArr];
-
       let availableShoes = [...shoesArr];
 
-      // خلط عشوائي
-
       const shuffle = (a) => a.sort(() => Math.random() - 0.5);
-
       shuffle(availableShirts);
-
       shuffle(availablePants);
-
       shuffle(availableShoes);
 
-      // محاولة انتقاء بألوان مختلفة (بسيطة)
-
       for (let s of availableShirts) {
-
         for (let p of availablePants) {
-
           for (let sh of availableShoes) {
-
             if (s.color !== p.color && p.color !== sh.color && s.color !== sh.color) {
-
               return { shirt: s, pants: p, shoes: sh };
-
             }
-
           }
-
         }
-
       }
-
-      // إذا لم نجد ثلاثي مختلف، نعيد أول ثلاثي ممكن
-
       return { shirt: availableShirts[0], pants: availablePants[0], shoes: availableShoes[0] };
-
     }
 
     let selected = selectDistinctColors(possibleShirts, possiblePants, possibleShoes);
-
     lastSuggestedOutfit = [selected.shirt, selected.pants, selected.shoes];
 
-    // عرض
-
     let box = document.getElementById("outfit");
-
     box.innerHTML = "";
-
     lastSuggestedOutfit.forEach(i => {
-
       box.innerHTML += `<div class="item"><img src="${i.img}"><div>${i.type} (${i.color})</div></div>`;
-
     });
-
     document.getElementById("saveFavBtn").classList.remove("hidden");
-
   };
 
   // ==================== المفضلة ====================
-
   window.saveFavorite = async () => {
-
     if (!currentUserId) return Swal.fire('عذراً', 'يرجى التسجيل لحفظ المفضلة', 'warning');
-
     if (lastSuggestedOutfit.length === 0) return Swal.fire('لم يتم اقتراح تنسيق بعد', '', 'info');
-
+    
     favoriteOutfits.push([...lastSuggestedOutfit]);
-
     await saveToFirebase();
-
     Swal.fire('تم', 'حفظ في المفضلة', 'success');
-
   };
 
   window.toggleFavorites = () => {
-
     if (!currentUserId && document.getElementById("favPage").classList.contains("hidden")) {
-
       return Swal.fire('تنبيه', 'المفضلة للمسجلين فقط', 'warning');
-
     }
-
     document.getElementById("mainPage").classList.toggle("hidden");
-
     document.getElementById("favPage").classList.toggle("hidden");
-
     if (!document.getElementById("favPage").classList.contains("hidden")) renderFavorites();
-
   };
 
   function renderFavorites() {
-
     let f = document.getElementById("favorites");
-
     if (favoriteOutfits.length === 0) {
-
       f.innerHTML = "<p style='text-align:center; color:#999'>لا توجد مفضلة</p>";
-
       return;
-
     }
-
     f.innerHTML = "";
-
     favoriteOutfits.forEach((outfit) => {
-
       let row = `<div class='grid' style='margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px'>`;
-
       outfit.forEach(i => {
-
         row += `<div class="item"><img src="${i.img}" style="height:60px"><div>${i.type}</div></div>`;
-
       });
-
       row += `</div>`;
-
       f.innerHTML += row;
-
     });
-
   }
 
   // ==================== تسجيل الخروج ====================
-
   window.logout = () => {
-
+    // حذف المستخدم من قائمة النشطاء عند تسجيل الخروج
+    if (currentUserId) {
+      remove(ref(db, 'presence/' + currentUserId));
+    }
     localStorage.removeItem("hendam_user");
-
     localStorage.removeItem("hendam_pass");
-
+    localStorage.removeItem("hendam_gender");
+    localStorage.removeItem("hendam_city");
     location.reload();
-
   };
 
-  // ==================== مشاركة التطبيق (الزر العائم) مع أيقونات SVG ====================
-
+  // ==================== مشاركة التطبيق ====================
   window.openShareModal = () => {
-
     const appLink = 'https://fay7ar.github.io/hendam/';
-
     Swal.fire({
-
       title: 'مشاركة هندام',
-
       html: `
-
         <div class="share-modal">
-
           <div class="share-link-box">${appLink}</div>
-
           <div class="share-buttons">
-
             <a href="https://wa.me/?text=${encodeURIComponent(appLink)}" target="_blank">
-
               <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20">
-
                 <path d="M19.077 4.928C17.191 3.041 14.683 2 12.006 2 6.798 2 2.548 6.193 2.54 11.393c-.003 1.747.456 3.457 1.328 4.996L2.25 21.75l5.416-1.577c1.48.847 3.148 1.294 4.876 1.295h.004c5.2 0 9.456-4.195 9.464-9.396.004-2.51-.97-4.873-2.857-6.76zM12.006 20.237h-.003c-1.485 0-2.94-.4-4.21-1.15l-.302-.18-3.214.937 1.005-3.122-.197-.315c-.807-1.29-1.235-2.785-1.232-4.33.007-4.325 3.526-7.842 7.86-7.842 2.098 0 4.07.82 5.554 2.307 1.483 1.487 2.298 3.46 2.294 5.56-.007 4.327-3.525 7.844-7.852 7.844zm4.308-5.878c-.235-.118-1.392-.687-1.607-.765-.216-.078-.373-.118-.53.118-.157.235-.61.765-.747.922-.138.157-.276.177-.51.06-.76-.353-1.5-.8-2.16-1.33-.816-.66-1.367-1.477-1.527-1.728-.16-.25-.017-.386.12-.51.124-.11.276-.29.414-.434.138-.144.184-.246.276-.41.092-.165.046-.31-.023-.434-.07-.124-.53-1.277-.726-1.748-.19-.46-.384-.398-.53-.405-.138-.008-.296-.01-.454-.01-.16 0-.415.06-.632.296-.216.236-.826.808-.826 1.97 0 1.163.846 2.287.964 2.445.118.157 1.636 2.555 3.964 3.508.553.226.985.362 1.322.464.555.166 1.06.142 1.46.086.445-.062 1.37-.56 1.564-1.1.194-.542.194-1.006.136-1.103-.058-.098-.216-.157-.452-.275z"/>
-
               </svg>
-
               واتساب
-
             </a>
-
             <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(appLink)}" target="_blank">
-
               <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20">
-
                 <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-
               </svg>
-
               فيسبوك
-
             </a>
-
             <a href="https://www.instagram.com/" target="_blank">
-
               <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20">
-
                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-
               </svg>
-
               انستقرام
-
             </a>
-
             <a href="https://www.tiktok.com/" target="_blank">
-
               <svg class="social-icon" viewBox="0 0 24 24" width="20" height="20">
-
                 <path d="M19.321 5.562a5.124 5.124 0 01-1.414-1.981c.018-.018.034-.037.051-.056.352-.412.6-.886.73-1.39h.002c.051-.202.087-.41.106-.621h-3.56v12.173c0 .927-.334 1.777-.888 2.446-.508.614-1.234 1.053-2.072 1.203-.387.07-.79.081-1.194.026-1.223-.165-2.242-.987-2.697-2.086-.331-.8-.32-1.68.026-2.466.454-1.028 1.379-1.766 2.505-1.94.387-.06.783-.06 1.17-.003v-3.56c-.393-.042-.786-.042-1.179 0-1.668.165-3.206.907-4.341 2.127-.965 1.037-1.585 2.36-1.781 3.765-.077.56-.069 1.13.023 1.691.008.048.017.096.026.144.045.239.103.475.177.708.077.238.171.47.28.694.108.221.232.435.368.639.138.206.289.402.45.588.162.187.336.363.519.527.184.165.376.32.576.466 1.377.991 3.086 1.488 4.8 1.398 1.398-.073 2.763-.567 3.916-1.423.953-.706 1.692-1.638 2.163-2.694.413-.925.615-1.929.603-2.937V8.608c.005.002 2.158 1.109 2.158 1.109v-3.56c-.656.006-1.292-.185-1.819-.546l-.058-.049z"/>
-
               </svg>
-
               تيك توك
-
             </a>
-
           </div>
-
           <button class="copy-btn" id="copyLinkBtn">
-
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-
               <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-
               <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
-
             </svg>
-
             نسخ الرابط
-
           </button>
-
         </div>
-
       `,
-
       showConfirmButton: false,
-
       showCloseButton: true,
-
       width: '600px',
-
       padding: '2em',
-
       didOpen: () => {
-
         document.getElementById('copyLinkBtn').addEventListener('click', () => {
-
           navigator.clipboard.writeText(appLink);
-
           Swal.fire({ icon: 'success', text: 'تم نسخ الرابط', timer: 1500, showConfirmButton: false });
-
         });
-
       }
-
     });
-
   };
 
   // رفع صورة: تغيير نص الاختيار
-
   document.getElementById('image').addEventListener('change', function(e) {
-
     if (this.files && this.files[0]) {
-
       document.querySelector('.custom-upload span').innerText = 'تم اختيار الصورة';
-
     } else {
-
       document.querySelector('.custom-upload span').innerText = 'انقر لاختيار صورة';
-
     }
-
   });
 
 </script>
-
 </body>
-
 </html>
